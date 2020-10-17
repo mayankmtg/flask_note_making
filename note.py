@@ -1,3 +1,5 @@
+from crypto import encrypt, decrypt
+
 def list_all_notes(mysql, user_id):
     if user_id == None:
         return []
@@ -8,6 +10,8 @@ def list_all_notes(mysql, user_id):
         for row in cur:
             notes.append(row[0])
         cur.close()
+        for i in range(len(notes)):
+            notes[i] = decrypt(notes[i])
         return notes
     except Exception:
         return []
@@ -15,7 +19,8 @@ def list_all_notes(mysql, user_id):
 def save_note(mysql, note, user_id) -> bool:
     try:
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO notes(note, uuid) VALUES (%s, %s);", (note, user_id))
+        encrypted_note = encrypt(note)
+        cur.execute("INSERT INTO notes(note, uuid) VALUES (%s, %s);", (encrypted_note, user_id))
         mysql.connection.commit()
         cur.close()
         return True

@@ -1,7 +1,6 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_mysqldb import MySQL
-from uuid import uuid1
 import logging
 from user import *
 from note import *
@@ -24,6 +23,8 @@ FAILURE_RESPONSE = {"status": "failure"}
 def register():
     if request.method == "POST":
         registration = request.json
+        if not validate_user_input(registration):
+            return FAILURE_RESPONSE
         username = registration.get("username")
         password = registration.get("password")
         if register_user(mysql, username, password):
@@ -37,6 +38,8 @@ def login():
     if request.method == "POST":
         app.logger.info('LOGIN POST')
         credentials = request.json
+        if not validate_user_input(credentials):
+            return FAILURE_RESPONSE
         username = credentials.get("username")
         password = credentials.get("password")
         user_id = verify_user(mysql, username, password)
